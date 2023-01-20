@@ -28,7 +28,14 @@ public class BirdScript : MonoBehaviour
     float _glideDeceleration = 10;
 
     public System.Action OnDeath;
+    public System.Action OnScore;
     public bool IsGliding {get; private set;}
+
+    void Start()
+    {
+        OnDeath += this.Reset;
+        OnScore += () => Debug.Log("Scored!");
+    }
 
     void OnEnable()
     {
@@ -48,7 +55,7 @@ public class BirdScript : MonoBehaviour
     {
         if (transform.position.y < -10)
         {
-            Die();
+            OnDeath?.Invoke();
         }
 
         if (_rbdy2D.velocity.y < -_glideSpeed && _birdInput.isHeld)
@@ -84,14 +91,16 @@ public class BirdScript : MonoBehaviour
     {
         if (coll.gameObject.CompareTag(Tags.Death))
         {
-            Die();
+            OnDeath?.Invoke();
         }
     }
 
-    private void Die()
+    void OnTriggerEnter2D(Collider2D coll)
     {
-        Reset();
-        OnDeath?.Invoke();
+        if (coll.gameObject.CompareTag(Tags.Score))
+        {
+            OnScore?.Invoke();
+        }
     }
 
     private void Reset()
